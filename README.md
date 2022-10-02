@@ -8,6 +8,8 @@ Clone this repository in a folder of your linking.
 The available commands are possible to run using php. This can either be done by a local instance of PHP, or the `docker-compose` image that is provided in the repository
 The minimum version of PHP is 8.1.
 
+Run with docker using `docker-compose run --rm app php ./bin/console {command}`
+
 ### Available Commands
 | Commands | Description | Arguments | Example | 
 | ------------- |:-------------:|:-------:| -----:|
