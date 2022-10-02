@@ -9,13 +9,14 @@ The available commands are possible to run using php. This can either be done by
 The minimum version of PHP is 8.1.
 
 ### Available Commands
-| Commands | Description | Arguments | Example
-| SET | Set a key to the given value | Key : string, value : mixed | `php ./bin/console SET x 1`
-| GET | Get a value by the given key | Key : string | `php ./bin/console GET x`
-| DEL | Delete a value by the given key | Key : string | `php ./bin/console DEL x`
-| START | Start a transaction | None | `php ./bin/console START` 
-| COMMIT | Commit a transaction | None | `php ./bin/console COMMIT`
-| ROLLBACK | Rollback a transaction | None | `php ./bin/console ROLLBACK`
+| Commands | Description | Arguments | Example | 
+| ------------- |:-------------:|:-------:| -----:|
+| SET | Set a key to the given value | Key : string, value : mixed | `php ./bin/console SET x 1` | 
+| GET | Get a value by the given key | Key : string | `php ./bin/console GET x` | 
+| DEL | Delete a value by the given key | Key : string | `php ./bin/console DEL x` |
+| START | Start a transaction | None | `php ./bin/console START` |
+| COMMIT | Commit a transaction | None | `php ./bin/console COMMIT` |
+| ROLLBACK | Rollback a transaction | None | `php ./bin/console ROLLBACK` |
 
 ## Running tests
 Running the tests that are located in `tests`
