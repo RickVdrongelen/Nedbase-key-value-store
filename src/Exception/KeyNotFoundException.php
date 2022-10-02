@@ -9,4 +9,9 @@ class KeyNotFoundException extends Exception {
     {
         parent::__construct("Cannot find a value by the name of '$key'", $code, $previous);
     }
+
+    public function __toString(): string
+    {
+        return $this->message;
+    }
 }

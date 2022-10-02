@@ -12,6 +12,8 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Path;
 
 class FileStorageServiceTest extends KernelTestCase 
 {
@@ -22,16 +24,19 @@ class FileStorageServiceTest extends KernelTestCase
 
     public function setUp() : void
     {
+        // Clear the storage folder
+        $fileSystem = new Filesystem();
+        $fileSystem->remove(Path::normalize("var/storage"));
+
         $this->kernelInterface = self::bootKernel();
         $this->application = new Application($this->kernelInterface);
         $this->container = static::getContainer();
         $this->fileStorageService = $this->container->get(FileStorageService::class);
-
+        
         parent::setUp();
     }
 
     public function test_it_sets_and_gets_value() {
-
         $key = "test";
         $val = rand(1, 1000000);
 
@@ -61,12 +66,48 @@ class FileStorageServiceTest extends KernelTestCase
         $this->assertNull($this->fileStorageService->set($removeKey, $removeVal));
         $this->assertEquals($removeVal, $this->fileStorageService->get($removeKey));
         $this->assertNull($this->fileStorageService->delete($removeKey));
-        $this->assertNull($this->fileStorageService->get($removeKey));
+        $this->expectException(KeyNotFoundException::class);
+        $this->fileStorageService->get($removeKey);
     }
 
     public function test_exists_return_false() {
         $key = "does-not-exists";
 
         $this->assertFalse($this->fileStorageService->exists($key));
+    }
+
+    public function test_it_starts_and_rollback_new_transaction() {
+        $nonTransactionKey = "not-transaction";
+        $nonTransactionValue = rand(1, 100);
+
+        $transactionKey = "transaction";
+        $transactionValue = rand(100, 1000);
+        
+        $this->fileStorageService->set($nonTransactionKey, $nonTransactionValue);
+        $this->assertEquals($nonTransactionValue, $this->fileStorageService->get($nonTransactionKey));
+
+        $this->fileStorageService->startTransaction();
+        $this->fileStorageService->set($transactionKey, $transactionValue);
+        $this->assertEquals($transactionValue, $this->fileStorageService->get($transactionKey));
+        $this->fileStorageService->rollback();
+        $this->assertEquals($nonTransactionValue, $this->fileStorageService->get($nonTransactionKey));
+    }
+
+    public function test_it_starts_and_commits_new_transaction() {
+        $nonTransactionKey = "not-transaction";
+        $nonTransactionValue = rand(1, 100);
+
+        $transactionKey = "transaction";
+        $transactionValue = rand(100, 1000);
+        
+        $this->fileStorageService->set($nonTransactionKey, $nonTransactionValue);
+        $this->assertEquals($nonTransactionValue, $this->fileStorageService->get($nonTransactionKey));
+
+        $this->fileStorageService->startTransaction();
+        $this->fileStorageService->set($transactionKey, $transactionValue);
+        $this->assertEquals($transactionValue, $this->fileStorageService->get($transactionKey));
+        $this->fileStorageService->commit();
+        $this->assertEquals($nonTransactionValue, $this->fileStorageService->get($nonTransactionKey));
+        $this->assertEquals($transactionValue, $this->fileStorageService->get($transactionKey));
     }
 }

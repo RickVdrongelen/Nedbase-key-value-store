@@ -2,6 +2,7 @@
 namespace App\Service;
 
 use App\Contract\FileHandlerInterface;
+use App\Exception\KeyNotFoundException;
 use Generator;
 use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Filesystem\Filesystem;
@@ -23,24 +24,23 @@ class JsonlFileHandler implements FileHandlerInterface {
         return $this;
     }
 
-    static function init(string $basePath, string $fileName): static
+    static function init(string $path): static
     {
         $fileSystem = new FileSystem();
-        $fileName = $fileName.self::FILE_EXT;
+        $fileName = $path.self::FILE_EXT;
         // Check whether the base path exists
-        if(!$fileSystem->exists(Path::normalize($basePath))) {
-            $fileSystem->mkdir(Path::normalize($basePath));
+        if(!$fileSystem->exists(Path::normalize(dirname($fileName)))) {
+            $fileSystem->mkdir(Path::normalize(dirname($fileName)));
         }
 
-        $joinedFilePath = Path::join($basePath, $fileName);
         // Check whether the file exists
-        if(!$fileSystem->exists($joinedFilePath)) {
-            $fileSystem->touch($joinedFilePath);
+        if(!$fileSystem->exists($fileName)) {
+            $fileSystem->touch($fileName);
         }
 
         return (new static())
-            ->setFilePointer(fopen($joinedFilePath, "r+"))
-            ->setFilePath($joinedFilePath);
+            ->setFilePointer(fopen($fileName, "r+"))
+            ->setFilePath($fileName);
     }
 
     public function getValue(string $key): mixed
@@ -58,7 +58,7 @@ class JsonlFileHandler implements FileHandlerInterface {
         }
 
         rewind($this->filePointer);
-        return null;
+        throw new KeyNotFoundException($key);
     }
 
     public function setValue(string $key, mixed $value): bool
@@ -68,7 +68,7 @@ class JsonlFileHandler implements FileHandlerInterface {
             "value" => $value
         ])."\n";
 
-        if($this->getValue($key) === null) {
+        if(!$this->doesExist($key)) {
             // value does not yet exists, append to the file
             fseek($this->filePointer, 0, SEEK_END);
             $res = fputs($this->filePointer, $newJson) > 0;
@@ -128,6 +128,32 @@ class JsonlFileHandler implements FileHandlerInterface {
         }
 
         return false;
+    }
+
+    public function getFileExtension() {
+        return self::FILE_EXT;
+    }
+
+    public function removeData() {
+        $fileSystem = new Filesystem();
+        
+        $fileSystem->remove($this->path);
+    }
+
+    public function merge(string $toFileName)
+    {
+        if(!$this->filePointer) {
+            return false;
+        }
+
+        $writing = fopen($toFileName, "r+");
+        fseek($writing, 0, SEEK_END);
+
+        while(($line = fgets($this->filePointer)) !== false) {
+            fputs($writing, $line);
+        }
+
+        fclose($this->filePointer);
     }
 
     private function getTempFile() {

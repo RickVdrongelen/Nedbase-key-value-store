@@ -5,4 +5,4 @@ services:
     public: true
   App\Service\FileStorageService:
     public: true
-    arguments: ['@App\Service\JsonlFileHandler', '@App\Service\JsonlFileHandler'] 
+    arguments: ['@App\Service\JsonlFileHandler', '@Symfony\Component\Filesystem\Filesystem'] 
