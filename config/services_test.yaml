@@ -1,0 +1,8 @@
+services:
+  App\Contract\StorageInterface:
+    public: true
+  App\Contract\FileHandlerInterface:
+    public: true
+  App\Service\FileStorageService:
+    public: true
+    arguments: ['@App\Service\JsonlFileHandler', '@App\Service\JsonlFileHandler'] 
