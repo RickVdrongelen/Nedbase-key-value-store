@@ -3,6 +3,7 @@ This project is created from the requirements set by [this](https://github.com/n
 
 ## Installation
 Clone this repository in a folder of your linking.
+Run `docker-compose run --rm app composer install`
 
 ## Running commands
 The available commands are possible to run using php. This can either be done by a local instance of PHP, or the `docker-compose` image that is provided in the repository
