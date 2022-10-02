@@ -17,4 +17,8 @@ The minimum version of PHP is 8.1.
 | COMMIT | Commit a transaction | None | `php ./bin/console COMMIT`
 | ROLLBACK | Rollback a transaction | None | `php ./bin/console ROLLBACK`
 
+## Running tests
+Running the tests that are located in `tests`
+Run the following using php:
+`php ./bin/phpunit`
 
